@@ -33,6 +33,10 @@ OUT = (pathlib.Path(__file__).resolve().parent if "__file__" in globals() else p
 # A town of N = 1000 people, one of them infected. In a tiny time step `dt` (in days):
 # * new infections = beta * S * I / N * dt  (beta = contacts that pass the infection, per day)
 # * new recoveries = gamma * I * dt          (gamma = 1 / days a person stays infectious)
+#
+# S * I / N is large when there are many susceptible AND many infected people, because
+# then meetings between the two kinds are common. The answers are averages, so fractions
+# of a person (like 0.4995) are fine here.
 
 # %%
 def one_step(S, I, R, beta, gamma, N, dt):
@@ -44,7 +48,8 @@ def one_step(S, I, R, beta, gamma, N, dt):
 
 # %% [markdown]
 # ## Step 2: repeat many times
-# We use steps of 0.1 day and keep one value per day.
+# We use steps of 0.1 day and keep one value per day. Small steps matter: with a step of a
+# whole day the slopes are applied too long before being updated, and the curve is less accurate.
 
 # %%
 def run_outbreak(beta, gamma, N=1000, I0=1, days=120, dt=0.1):
@@ -62,7 +67,7 @@ def run_outbreak(beta, gamma, N=1000, I0=1, days=120, dt=0.1):
 
 # %% [markdown]
 # ## Step 3: how many does each case infect?
-# One infected person stays infectious for 1/gamma days and meets people at rate beta, so
+# One infected person stays infectious for 1/gamma days and passes the infection on at rate beta, so
 # infects about **beta / gamma** others (when almost everybody is still susceptible). We call
 # this number R0, the *basic reproduction number*. If R0 is above 1, each case replaces itself
 # with more than one case and the outbreak grows. If it is below 1, it dies away.
